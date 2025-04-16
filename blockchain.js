@@ -30,14 +30,33 @@ class SimpleBlock {
             .update(index + timestamp + previousHash + dataString + nonce) // Feed input
             .digest("hex"); // Return hash in hex format, 64 hex characters
     }
+
+    // Mines the block by finding a hash that satisfies the difficulty level
+    mineBlock(difficultyLevel) {
+        // Keep trying different nonces until the hash meets the difficulty criteria
+        while (
+            this.blockHeader.hash.substring(0, difficultyLevel) !==
+            Array(difficultyLevel + 1).join("0") // generates a string like '0000' for difficulty 4
+        ) {
+            this.blockHeader.nonce++; // Increment nonce to get a new hash each time
+            this.blockHeader.hash = this.generateHash(); // Recalculate hash using updated nonce
+        }
+
+        console.log(`Block successfully mined with Hash: ${this.blockHeader.hash}`);
+    }
 }
 
-//  first (Genesis) block
-const firstBlock = new SimpleBlock(0, Date.now(), "Genesis Block", 0)
+// Creating the first block (Genesis Block)
+const firstBlock = new SimpleBlock(0, Date.now(), "Genesis Block", "0");
 
-console.log(`
-    Block Details: 
-    Index: ${firstBlock.blockHeader.index}
-    Timestamp: ${new Date(firstBlock.blockHeader.timestamp)}
-    Hash: ${firstBlock.blockHeader.hash}    
-`);
+console.log("Here is your first block : ", firstBlock);
+
+// Creating a new block
+const newBlock = new SimpleBlock(1, Date.now(), "This is a mined block", firstBlock.blockHeader.hash);
+
+// Mining the new block
+console.log("Mining the new block...");
+newBlock.mineBlock(5); // Difficulty level of 5
+
+// Displaying the mined block
+console.log("Here is your mined block : ", newBlock);
