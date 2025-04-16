@@ -76,6 +76,30 @@ class SimpleBlockchain {
         this.chain.push(newBlock);
         console.log("Block successfully added to the blockchain!");
     }
+
+    validateBlockchain() {
+        console.log("\nValidating the blockchain...");
+
+        // Start checking from the second block (index 1)
+        for (let i = 1; i < this.chain.length; i++) {
+            const currentBlock = this.chain[i];
+            const previousBlock = this.chain[i - 1];
+
+            // Recalculate the hash and compare to stored hash
+            if (currentBlock.blockHeader.hash !== currentBlock.generateHash()) {
+                console.log(`Block ${i} has been tampered with!`);
+                return false;
+            }
+
+            // Check if current block is properly linked to the previous one
+            if (currentBlock.blockHeader.previousHash !== previousBlock.blockHeader.hash) {
+                console.log(`Block ${i} is not linked to the previous block!`);
+                return false;
+            }
+        }
+        console.log("Blockchain is valid!");
+        return true;
+    }
 }
 
 // Instantiate a new blockchain
@@ -92,3 +116,15 @@ myBlockchain.addNewBlock(block2);
 // Print the entire blockchain in a structured format
 console.log("\n--- Blockchain Structure ---");
 console.log(JSON.stringify(myBlockchain, null, 2));
+
+// Validate the blockchain before tampering
+console.log("\nValidating blockchain before tampering:");
+myBlockchain.validateBlockchain();
+
+// Simulate tampering with block1's data
+console.log("\nTampering with Block 1...");
+block1.blockBody.data = "Tampered Data";
+
+// Validate the blockchain after tampering
+console.log("\nValidating blockchain after tampering:");
+myBlockchain.validateBlockchain();
