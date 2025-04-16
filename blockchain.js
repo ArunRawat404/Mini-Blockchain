@@ -101,6 +101,29 @@ class SimpleBlockchain {
         console.log("Blockchain is valid!");
         return true;
     }
+
+    displayBlockchain() {
+        console.log("\n--- Blockchain Visualization ---");
+        this.chain.forEach((block, index) => {
+            // Display each block's details
+            console.log(`\nBlock ${index}:`);
+            console.log(`  Header:`);
+            console.log(`    Index: ${block.blockHeader.index}`);
+            console.log(`    Timestamp: ${new Date(block.blockHeader.timestamp)}`);
+            console.log(`    Previous Hash: ${block.blockHeader.previousHash}`);
+            console.log(`    Hash: ${block.blockHeader.hash}`);
+            console.log(`    Nonce: ${block.blockHeader.nonce}`);
+            console.log(`  Body:`);
+            console.log(`    Data: ${block.blockBody.data}`);
+        });
+
+        console.log(
+            "\n--- Chain Summary ---\n",
+            this.chain.map((block) =>
+                `[Block ${block.blockHeader.index}: ${block.blockHeader.hash.substring(0, 8)}...${block.blockHeader.hash.slice(-4)}]`
+            ).join(" -> ")
+        );
+    }
 }
 
 // Setting up the Readline Interface for input and output streams
@@ -118,13 +141,14 @@ function interactiveBlockchain() {
         // Base case: All requested blocks have been added
         if (blockIndex > totalBlocks) {
             console.log("\nFinal Blockchain Structure:");
-            console.log(JSON.stringify(myBlockchain, null, 2));
+            // Call the visualization method
+            myBlockchain.displayBlockchain();
             rl.close();
             return;
         }
 
         // Ask the user to enter data for the current block
-        rl.question(`Enter data for Block ${blockIndex}: `, (blockData) => {
+        rl.question(`\nEnter data for Block ${blockIndex}: `, (blockData) => {
             const newBlock = new SimpleBlock(
                 blockIndex,
                 Date.now(),
@@ -140,7 +164,7 @@ function interactiveBlockchain() {
     }
 
     // Ask how many blocks the user wants to add
-    rl.question("How many blocks would you like to add? ", (answer) => {
+    rl.question("\nHow many blocks would you like to add? ", (answer) => {
         const totalBlocks = parseInt(answer);
 
         // Validate input
