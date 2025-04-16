@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const readline = require("readline");
 
 class SimpleBlock {
     constructor(blockIndex, timestamp, blockData, previousBlockHash = "") {
@@ -102,29 +103,58 @@ class SimpleBlockchain {
     }
 }
 
-// Instantiate a new blockchain
-const myBlockchain = new SimpleBlockchain();
+// Setting up the Readline Interface for input and output streams
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
 
-// Create and add the first block after the genesis block
-const block1 = new SimpleBlock(1, Date.now(), "First block after genesis");
-myBlockchain.addNewBlock(block1);
+// Function to run an interactive blockchain session
+function interactiveBlockchain() {
+    const myBlockchain = new SimpleBlockchain();
 
-// Create and add the second block
-const block2 = new SimpleBlock(2, Date.now(), "Second block after genesis");
-myBlockchain.addNewBlock(block2);
+    // Recursive function to add blocks based on user input
+    function addBlockRecursively(blockIndex, totalBlocks) {
+        // Base case: All requested blocks have been added
+        if (blockIndex > totalBlocks) {
+            console.log("\nFinal Blockchain Structure:");
+            console.log(JSON.stringify(myBlockchain, null, 2));
+            rl.close();
+            return;
+        }
 
-// Print the entire blockchain in a structured format
-console.log("\n--- Blockchain Structure ---");
-console.log(JSON.stringify(myBlockchain, null, 2));
+        // Ask the user to enter data for the current block
+        rl.question(`Enter data for Block ${blockIndex}: `, (blockData) => {
+            const newBlock = new SimpleBlock(
+                blockIndex,
+                Date.now(),
+                blockData,
+                myBlockchain.getLatestBlock().blockHeader.hash
+            );
 
-// Validate the blockchain before tampering
-console.log("\nValidating blockchain before tampering:");
-myBlockchain.validateBlockchain();
+            myBlockchain.addNewBlock(newBlock);
 
-// Simulate tampering with block1's data
-console.log("\nTampering with Block 1...");
-block1.blockBody.data = "Tampered Data";
+            // Recursively prompt for the next block
+            addBlockRecursively(blockIndex + 1, totalBlocks);
+        });
+    }
 
-// Validate the blockchain after tampering
-console.log("\nValidating blockchain after tampering:");
-myBlockchain.validateBlockchain();
+    // Ask how many blocks the user wants to add
+    rl.question("How many blocks would you like to add? ", (answer) => {
+        const totalBlocks = parseInt(answer);
+
+        // Validate input
+        if (isNaN(totalBlocks) || totalBlocks <= 0) {
+            console.log("Invalid input. Please enter a positive number.");
+            // End the session on invalid input
+            rl.close();
+            return;
+        }
+
+        // Start adding blocks beginning from index 1
+        addBlockRecursively(1, totalBlocks);
+    });
+}
+
+// Start the interactive blockchain process
+interactiveBlockchain();
