@@ -46,17 +46,49 @@ class SimpleBlock {
     }
 }
 
-// Creating the first block (Genesis Block)
-const firstBlock = new SimpleBlock(0, Date.now(), "Genesis Block", "0");
+class SimpleBlockchain {
+    constructor() {
+        // Initialize the blockchain with the genesis block
+        this.chain = [this.createGenesisBlock()];
+    }
 
-console.log("Here is your first block : ", firstBlock);
+    // Method to create the genesis block
+    createGenesisBlock() {
+        console.log("Creating the genesis block...");
+        return new SimpleBlock(0, Date.now(), "Genesis Block", "0");
+    }
 
-// Creating a new block
-const newBlock = new SimpleBlock(1, Date.now(), "This is a mined block", firstBlock.blockHeader.hash);
+    // Returns the most recent block in the chain
+    getLatestBlock() {
+        return this.chain[this.chain.length - 1];
+    }
 
-// Mining the new block
-console.log("Mining the new block...");
-newBlock.mineBlock(5); // Difficulty level of 5
+    // Adds a new block to the chain after linking and mining it
+    addNewBlock(newBlock) {
+        // Set previousHash of new block to the hash of the latest block
+        newBlock.blockHeader.previousHash = this.getLatestBlock().blockHeader.hash;
 
-// Displaying the mined block
-console.log("Here is your mined block : ", newBlock);
+        // Begin mining with a difficulty of 2
+        console.log(`Mining a new block with difficulty 2...`);
+        newBlock.mineBlock(2);
+
+        // Append the mined block to the blockchain
+        this.chain.push(newBlock);
+        console.log("Block successfully added to the blockchain!");
+    }
+}
+
+// Instantiate a new blockchain
+const myBlockchain = new SimpleBlockchain();
+
+// Create and add the first block after the genesis block
+const block1 = new SimpleBlock(1, Date.now(), "First block after genesis");
+myBlockchain.addNewBlock(block1);
+
+// Create and add the second block
+const block2 = new SimpleBlock(2, Date.now(), "Second block after genesis");
+myBlockchain.addNewBlock(block2);
+
+// Print the entire blockchain in a structured format
+console.log("\n--- Blockchain Structure ---");
+console.log(JSON.stringify(myBlockchain, null, 2));
